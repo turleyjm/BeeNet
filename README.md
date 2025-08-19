@@ -6,5 +6,5 @@ This repo contains the code used to infer the shapes of flowers from the electri
 
 The data can be found at [Zenodo]. 
 
-[arXiv]: https://www.biorxiv.org/content/10.1101/2024.04.10.588842v2.abstract
-[Zenodo]: https://zenodo.org/records/10846684
+[arXiv]: https://doi.org/10.48550/arXiv.2508.11724
+[Zenodo]: https://zenodo.org/records/16879470
