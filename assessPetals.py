@@ -1,11 +1,16 @@
+# Assess reconstruction quality by computing F1 scores between predicted and ground truth masks
+# Creates a dataframe with F1 scores and metadata for each prediction
+
 import os
 import skimage as sm
 import numpy as np
 import pandas as pd
 
+# Select dataset to assess
 dataset = "testing"
 # dataset = "validation"
 
+# Get list of ground truth (labelled) mask files
 folder = f"outputs/dat_{dataset}"
 cwd = os.getcwd()
 Fullfilenames = os.listdir(cwd + "/" + folder)
@@ -14,9 +19,11 @@ for file in Fullfilenames:
     if "labelled" in file:
         fileList.append(file)
 
+# Compute F1 score (Dice coefficient) between label and prediction
 def F1score(label, pred):
     return (2*np.sum(label[pred==1])/(2*np.sum(label[pred==1]) + np.sum(label[pred!=1]) + np.sum(pred[label!=1])))
 
+# Parse filename to extract flower parameters
 def Filename(file):
     types = file.split("_")[1:-1]
 
@@ -38,16 +45,18 @@ def Filename(file):
         c = "0.5"
     return p, r, d, c, b, perm, s
 
-
+# Process each prediction and compute F1 scores
 _df = []
 for file in fileList:
-
+    # Load ground truth mask
     label = sm.io.imread(folder + "/" + file).astype(int)//255
 
+    # Load predicted mask and threshold to binary
     pred = sm.io.imread(folder + "/" + file.replace("labelled", "pred")).astype(int)[0]
     pred[pred<128] = 0
     pred[pred>=128] = 1
 
+    # Extract parameters from filename
     p, r, d, c, b, perm, s = Filename(file)
     
     _df.append(
@@ -64,6 +73,7 @@ for file in fileList:
         }
     )
 
+# Create dataframe and save results
 dfPetal = pd.DataFrame(_df)
 
 dfPetal.to_pickle(f"outputs/dfPetal{dataset}.pkl")

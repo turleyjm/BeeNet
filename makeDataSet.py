@@ -1,3 +1,6 @@
+# Generate training, validation, and testing datasets from electric field CSV files
+# Creates paired electric field images (input) and flower mask images (output)
+
 import os
 from os.path import exists
 import scipy as sp
@@ -9,7 +12,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import tifffile 
 from datetime import datetime
 
-
+# Generate 2D rotation matrix
 def rotation_matrix(theta):
     R = np.array(
         [
@@ -20,7 +23,7 @@ def rotation_matrix(theta):
 
     return R
 
-
+# Combine electric field and potential data into single dataframe
 def makeDataframe(df_e, df_p):
     _df = pd.DataFrame({"x": [], "y": [], "E_x": [], "E_y": [], "E_p": []})
     _df["x"] = df_e.iloc[:, 0]
@@ -43,12 +46,14 @@ def makeDataframe(df_e, df_p):
 
     return df
 
-
+# Create binary mask image from petal outline coordinates
 def petalMask(X, Y):
     petal = np.zeros([401, 401])
+    # Draw petal outline
     for x, y in zip(X, Y):
         petal[int(200 + 50 * x), int(200 + 50 * y)] = 255
 
+    # Fill interior of petal using connected components
     imgLabel = sm.measure.label(255 - petal, background=0, connectivity=1)
 
     # imgLabel = np.asarray(imgLabel, "uint8")
@@ -59,7 +64,7 @@ def petalMask(X, Y):
 
     return petal
 
-
+# Convert electric field dataframe to 3D image array (E_x, E_y, E_potential)
 def petalField(df):
     X = np.linspace(-4, 4, 401)
     Y = np.linspace(-4, 4, 401)
@@ -76,7 +81,8 @@ def petalField(df):
 
     return field
 
-
+# Generate petal outline coordinates using parametric equations
+# p: number of petals, r: rotation, s: stretch, C: roundness, b: pointiness
 def petalFun(p, r, s, C, b):
     if C == 0:
         C = 0.5
@@ -133,7 +139,7 @@ def petalFun(p, r, s, C, b):
 
     return x, y
 
-
+# Convert numeric petal codes to string labels
 def check_p(p):
     if p == 6:
         p = "3-1"
@@ -146,14 +152,14 @@ def check_p(p):
 
     return p
 
-
-P = [3, 4]  # petals
-R = [0, 1, 2, 3, 4, 5]  # rotate petal
-D = [5, 6, 7, 8, 9, 10]  # bee distance
-C = [0] #roundness
-B = [1,2,3,4] # pointyness
-Perm = [10] # permeability
-S = [""] # stretched
+# Define parameter ranges for dataset generation
+P = [3, 4]  # Number of petals
+R = [0, 1, 2, 3, 4, 5]  # Rotation angles
+D = [5, 6, 7, 8, 9, 10]  # Arthropod-flower distances
+C = [0]  # Petal roundness parameter
+B = [1, 2, 3, 4]  # Petal pointiness parameter
+Perm = [10]  # Petal permeability
+S = [""]  # Stretch parameter
 if False:
     i = 0
     for r in R:
@@ -261,14 +267,16 @@ if False:
                                 # except:
                                 #     continue
 
-P = [3, 4]  # petals
-R = [0, 1, 2, 3, 4, 5]  # rotate petal
-D = [5, 6, 7, 8, 9, 10]  # bee distance
+# Define parameter ranges for splitting data into train/validation/test sets
+P = [3, 4]  # Number of petals
+R = [0, 1, 2, 3, 4, 5]  # Rotation angles
+D = [5, 6, 7, 8, 9, 10]  # Arthropod-flower distances
 C = [0]
-B = [1,2,3,4]
+B = [1, 2, 3, 4]
 Perm = [10]
 S = [""]
 
+# Split dataset: training (p=3, r<4), validation (p=3, r=4), testing (p=4)
 if True:
     # fields = np.zeros([432, 3, 401, 401])
     # i = 0
@@ -291,17 +299,20 @@ if True:
                                 try:
                                     p = check_p(p)
 
+                                    # Load petal mask and electric field images
                                     petal = sm.io.imread(
                                         f"dat/all masks/petal_{p}_{r}_-{d}_{c}{s}_{b}_{perm}.tif"
                                     ).astype(int)
                                     field = sm.io.imread(
                                         f"dat/all images/field_{p}_{r}_-{d}_{c}{s}_{b}_{perm}.tif"
                                     ).astype(int)
+                                    # Mask center region (arthropod location)
                                     rr0, cc0 = sm.draw.disk([200, 200], 55)
                                     field[rr0, cc0] = 2**15
 
                                     field = np.transpose(field, (2, 0, 1))
 
+                                    # Save to training, validation, or testing folder based on parameters
                                     if p != 4:
                                         if r != 4:
                                             petal = np.asarray(petal, "uint8")

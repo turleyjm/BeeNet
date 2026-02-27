@@ -1,3 +1,6 @@
+# Convert raw electric field CSV data to image format for visualization and testing
+# Similar to makeDataSet.py but for individual file conversion and visualization
+
 import os
 import scipy as sp
 import skimage as sm
@@ -7,7 +10,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import tifffile
 
-
+# Generate 2D rotation matrix
 def rotation_matrix(theta):
     R = np.array(
         [
@@ -18,7 +21,7 @@ def rotation_matrix(theta):
 
     return R
 
-
+# Combine electric field and potential data into single dataframe
 def makeDataframe(df_e, df_p):
     _df = pd.DataFrame({"x": [], "y": [], "E_x": [], "E_y": [], "E_p": []})
     _df["x"] = df_e.iloc[:, 0]
@@ -41,7 +44,8 @@ def makeDataframe(df_e, df_p):
 
     return df
 
-
+# Generate petal outline coordinates using parametric equations
+# p: number of petals, r: rotation, s: stretch, C: roundness
 def petalFun(p, r, s, C):
     if C == 0:
         C = 0.5
@@ -113,6 +117,7 @@ c = 0
 b=0
 perm = 10
 
+# Load electric field data from CSV based on parameters
 if c > 0:
     if s == "_ystretch":
         s = "_stretchy"
@@ -131,13 +136,16 @@ else:
     df_e = pd.read_csv("dat_Ryan/" + file_name + f"_efield{s}_{perm}.csv")
     df_p = pd.read_csv("dat_Ryan/" + file_name + f"_potential{s}_{perm}.csv")
 
+# Generate and save petal mask
 X, Y = petalFun(p, r, s, c)
 petal = petalMask(X, Y)
 petal = np.asarray(petal, "uint8")
 tifffile.imwrite(f"display/petal_{p}_{r}_-{d}_{c}{s}_{perm}.tif", petal, imagej=True)
 
+# Convert electric field data to image arrays
 df = makeDataframe(df_e, df_p)
 
+# Create meshgrid for field visualization
 X = np.linspace(-4, 4, 401)
 Y = np.linspace(-4, 4, 401)
 
@@ -147,12 +155,15 @@ E_x = np.zeros([X.shape[0], X.shape[1]])
 E_y = np.zeros([X.shape[0], X.shape[1]])
 E_p = np.zeros([X.shape[0], X.shape[1]])
 
+# Extract field components from dataframe
 for i in range(X.shape[1]):
     x = round(X[0, i], 2)
     E_x[i] = df["E_x"][df["x"] == x].iloc[::2]
     E_y[i] = df["E_y"][df["x"] == x].iloc[::2]
     E_p[i] = df["E_p"][df["x"] == x].iloc[::2]
 
+# Visualize electric field components (E_x, E_y, potential)
+# Visualize electric field components (E_x, E_y, potential)
 fig, ax = plt.subplots(1, 3, figsize=(16, 4))
 x, y = np.mgrid[-4:4.02:0.02, -4:4.02:0.02]
 _c = c
