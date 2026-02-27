@@ -102,7 +102,7 @@ for perm in Perm:
 
 fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(4, 4))
 
-plt.violinplot(x, positions=None, vert=True, widths=0.8, showmeans=True)
+plt.violinplot(x, positions=None, vert=True, widths=0.8, showmedians=True)
 ax.set_xticks([y + 1 for y in range(len(x))], labels=["10", "20"])
 ax.set_xlabel('Petal permeability')
 ax.set_ylabel('F1 scores')
@@ -110,7 +110,7 @@ ax.set_ylim([0.65, 1])
 ax.set_title("")
 
 fig.savefig(
-    f"results/F1 score with petal permeability",
+    f"results/F1 score with petal permeability median",
     transparent=True,
     bbox_inches="tight",
     dpi=300,
