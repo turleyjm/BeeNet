@@ -6,6 +6,8 @@ A deep learning framework for solving the inverse electrostatic imaging problem,
 
 Pollinating insects can obtain information from electric fields arising from flowers. The density and usefulness of electric information remain unknown. Here, we show that electric information can be used to reconstruct geometrical features of the field source. We develop an algorithm that infers the shapes of polarisable flowers from the electric field generated in response to a nearby charged arthropod. We computed the electric fields arising from arthropod–flower interactions for varying petal geometries, and used these data to train a deep learning U-Net model to recreate the floral shapes. The model accurately reconstructed diverse shapes, including more complex flower morphologies not included in training. Reconstruction performance peaked at an optimal arthropod–flower distance, indicating distance-dependent encoding of shape information. These findings indicate that electroreception can impart rich spatial detail, offering insights into the electric ecology of arthropods. Together, this work introduces a deep learning framework for solving the inverse electrostatic imaging problem, enabling object shape reconstruction directly from measured electric fields.
 
+For the paper, see [arXiv](https://arxiv.org/abs/2508.11724).
+
 ## Installation
 
 ### Requirements
@@ -87,13 +89,13 @@ The dataset consists of:
 
 Electric fields are computed for varying petal geometries and arthropod distances to capture distance-dependent shape encoding.
 
+The data can be found at [Zenodo](https://zenodo.org/records/16879470).
+
 ## Citation
 
 If you use this code for your research, please cite:
 
 ```
 BeeNet: Reconstructing Flower Shapes from Electric Fields using Deep Learning
-[Author names]
-[Journal/Conference]
-[Year]
+Turley, Jake, et al. "BeeNet: Reconstructing Flower Shapes from Electric Fields using Deep Learning." arXiv preprint arXiv:2508.11724 (2025).
 ```
